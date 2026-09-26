@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Weekly Pocket Mission with Alex!</title>
+    <style>
+        :root {
+            --bg-color: #f4f7fe;
+            --card-bg: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --need-color: #10b981;
+            --need-bg: #ecfdf5;
+            --need-border: #a7f3d0;
+            --want-color: #8b5cf6;
+            --want-bg: #f5f3ff;
+            --want-border: #ddd6fe;
+            --accent-gold: #f59e0b;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --danger: #ef4444;
+            --radius: 20px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            --bounce-transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Fredoka', 'Quicksand', system-ui, -apple-system, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#e0e7ff 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            overflow-x: hidden;
+        }
+
+        header {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border: 3px solid #e0e7ff;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alex-avatar {
+            width: 50px;
+            height: 50px;
+            background: #fef3c7;
+            border: 3px solid #f59e0b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: var(--bounce-transition);
+        }
+
+        .brand-text h1 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .brand-text p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .phase-indicator {
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        main {
+            width: 100%;
+            max-width: 900px;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .phase-container {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .phase-container.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .instruction-box {
+            background: #ffffff;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border-left: 6px solid var(--primary);
+            box-shadow: var(--shadow);
+            font-size: 1rem;
+            line-height: 1.4;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sorting-board {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media(min-width: 768px) {
+            .sorting-board {
+                grid-template-columns: 1fr 1.2fr 1fr;
+            }
+        }
+
+        .bucket {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 3px dashed #cbd5e1;
+            transition: var(--bounce-transition);
+            position: relative;
+        }
+
+        .bucket.need-bucket {
+            border-color: var(--need-border);
+            background: var(--need-bg);
+        }
+
+        .bucket.want-bucket {
+            border-color: var(--want-border);
+            background: var(--want-bg);
+        }
+
+        .bucket.drag-over {
+            transform: scale(1.02);
+            border-style: solid;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
+        }
+
+        .bucket-header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .bucket-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .need-bucket .bucket-title { color: var(--need-color); }
+        .want-bucket .bucket-title { color: var(--want-color); }
+
+        .bucket-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .bucket-items {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .item-deck {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .item-deck-title {
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .items-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .item-card {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: grab;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: var(--bounce-transition);
+            touch-action: none;
+            position: relative;
+        }
+
+        .item-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-card:active, .item-card.dragging {
+            cursor: grabbing;
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+
+        .item-icon {
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .item-price {
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+        }
+
+        .item-card.selected {
+            border-color: var(--primary);
+            background: #e0e7ff;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+
+        .budget-dashboard {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            border: 2px solid #e0e7ff;
+        }
+
+        @media(min-width: 640px) {
+            .budget-dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .meter-container {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 6px;
+            position: relative;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f59e0b, #10b981);
+            transition: width 0.5s ease-out;
+            border-radius: 6px;
+        }
+
+        .store-shelves {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media(min-width: 768px) {
+            .store-shelves {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .shelf-section {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .shelf-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .shelf-title.needs { color: var(--need-color); }
+        .shelf-title.wants { color: var(--want-color); }
+
+        .store-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--bounce-transition);
+        }
+
+        .store-item:hover {
+            border-color: #cbd5e1;
+            background: #ffffff;
+        }
+
+        .store-item.bought {
+            border-color: var(--need-color);
+            background: var(--need-bg);
+        }
+
+        .store-item.bought.want-item {
+            border-color: var(--want-color);
+            background: var(--want-bg);
+        }
+
+        .buy-btn {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--bounce-transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.9rem;
+        }
+
+        .buy-btn:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .buy-btn.bought-btn {
+            background: #10b981;
+        }
+
+        .buy-btn.bought-btn:hover {
+            background: #ef4444;
+        }
+
+        .buy-btn.bought-btn::after {
+            content: " ✓";
+        }
+
+        .buy-btn.bought-btn:hover::after {
+            content: " ✕";
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 800;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
+            transition: var(--bounce-transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 25px -5px rgba(16, 185, 129, 0.5);
+        }
+
+        .btn-action:disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Hint Banner Toast */
+        .toast-hint {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            background: #ffffff;
+            border: 3px solid #f59e0b;
+            border-radius: 20px;
+            padding: 16px 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            max-width: 500px;
+            width: 90%;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast-hint.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            font-size: 2.2rem;
+            line-height: 1;
+        }
+
+        .toast-content h4 {
+            color: #d97706;
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .toast-content p {
+            font-size: 0.85rem;
+            color: #4b5563;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+
+        /* Summary Modal Celebration */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 32px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-card h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-top: 10px;
+            font-weight: 800;
+        }
+
+        .badge-list {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .badge-chip {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            color: #b45309;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        canvas#confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="alex-avatar" id="alex-emoji">😊</div>
+            <div class="brand-text">
+                <h1>Pocket Mission with Alex</h1>
+                <p id="sub-header-text">Phase 1: Needs vs. Wants Sorting</p>
+            </div>
+        </div>
+        <div class="phase-indicator" id="phase-badge">
+            <span>🧩</span> Phase 1
+        </div>
+    </header>
+
+    <main>
+        <!-- PHASE 1: SORTING WARM-UP -->
+        <section id="phase-1" class="phase-container active">
+            <div class="instruction-box">
+                <div>
+                    <strong>Help Alex organize weekly items!</strong> Drag each item or tap an item then tap a bucket.
+                </div>
+                <div style="font-size: 0.85rem; font-weight:700; color:var(--primary);" id="sorting-progress">0/10 Sorted</div>
+            </div>
+
+            <div class="sorting-board">
+                <!-- Needs Bucket -->
+                <div class="bucket need-bucket" id="bucket-need" data-type="need">
+                    <div class="bucket-header">
+                        <div class="bucket-title">🚨 Essential Needs</div>
+                        <div class="bucket-subtitle">Things Alex MUST have to stay healthy & safe</div>
+                    </div>
+                    <div class="bucket-items" id="items-need"></div>
+                </div>
+
+                <!-- Unsorted Item Deck -->
+                <div class="item-deck">
+                    <div class="item-deck-title">📦 Items to Sort</div>
+                    <div class="items-grid" id="deck-items"></div>
+                </div>
+
+                <!-- Wants Bucket -->
+                <div class="bucket want-bucket" id="bucket-want" data-type="want">
+                    <div class="bucket-header">
+                        <div class="bucket-title">🎁 Fun Wants</div>
+                        <div class="bucket-subtitle">Nice extras that add fun or comfort</div>
+                    </div>
+                    <div class="bucket-items" id="items-want"></div>
+                </div>
+            </div>
+
+            <button class="btn-action" id="btn-to-phase2" disabled onclick="transitionToPhase2()">
+                Start Weekly Shopping Run 🛒
+            </button>
+        </section>
+
+        <!-- PHASE 2: BUDGETING CHALLENGE -->
+        <section id="phase-2" class="phase-container">
+            <div class="budget-dashboard">
+                <div class="stat-card">
+                    <div class="stat-icon">💵</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Remaining Wallet Budget</span>
+                        <span class="stat-value" id="wallet-display">$70.00</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">❤️</div>
+                    <div class="stat-info">
+                        <span class="stat-label">Alex's Health & Safety Meter</span>
+                        <span class="stat-value" id="meter-text">0%</span>
+                        <div class="meter-container">
+                            <div class="meter-fill" id="meter-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="instruction-box">
+                <span>💡 <strong>Goal:</strong> Buy ALL essential Needs first to keep Alex 100% healthy! Then choose to buy extra Wants or put money into the 🏺 <strong>Savings Jar</strong>!</span>
+            </div>
+
+            <div class="store-shelves">
+                <!-- Needs Shelf -->
+                <div class="shelf-section">
+                    <div class="shelf-title needs">
+                        <span>🚨 Essential Needs Shelf</span>
+                    </div>
+                    <div id="shelf-needs" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+
+                <!-- Wants Shelf -->
+                <div class="shelf-section">
+                    <div class="shelf-title wants">
+                        <span>🎁 Fun Wants Shelf</span>
+                    </div>
+                    <div id="shelf-wants" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+            </div>
+
+            <button class="btn-action" id="btn-checkout" onclick="attemptCheckout()">
+                Finish Week & Save Balance 🏦
+            </button>
+        </section>
+    </main>
+
+    <!-- Inline Hint Toast -->
+    <div class="toast-hint" id="hint-toast">
+        <div class="toast-icon" id="toast-icon">💡</div>
+        <div class="toast-content">
+            <h4 id="toast-title">Friendly Hint</h4>
+            <p id="toast-msg">Here is a clue to help Alex!</p>
+        </div>
+    </div>
+
+    <!-- Celebration Summary Modal -->
+    <div class="modal-overlay" id="summary-modal">
+        <canvas id="confetti-canvas"></canvas>
+        <div class="modal-card">
+            <div style="font-size: 3.5rem; line-height: 1;" id="modal-emoji">🎉</div>
+            <h2 id="modal-heading">Mission Accomplished!</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top:4px;" id="modal-sub">Alex had a fantastic week thanks to you!</p>
+
+            <div class="badge-list">
+                <div class="badge-chip">🌟 Smart Budgeter</div>
+                <div class="badge-chip">❤️ Health Hero</div>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span>Essential Needs Bought:</span>
+                    <span style="color:var(--need-color);" id="sum-needs">5 / 5 ($55)</span>
+                </div>
+                <div class="summary-row">
+                    <span>Fun Wants Bought:</span>
+                    <span style="color:var(--want-color);" id="sum-wants">0 ($0)</span>
+                </div>
+                <div class="summary-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:2px;">
+                    <span>Saved in Piggy Bank:</span>
+                    <span style="color:var(--accent-gold);" id="sum-saved">$0.00</span>
+                </div>
+            </div>
+
+            <button class="btn-action" onclick="resetGame()">
+                Play Mission Again 🔄
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game Items Master Data
+        const ITEMS_DATA = [
+            // Needs
+            { id: 'n1', name: 'Clean Water', category: 'need', price: 2, icon: '💧', hint: 'Alex needs clean water every single day to stay healthy!' },
+            { id: 'n2', name: 'Balanced Meal', category: 'need', price: 8, icon: '🥗', hint: 'Nutritious food gives Alex energy to grow and learn.' },
+            { id: 'n3', name: 'Winter Jacket', category: 'need', price: 20, icon: '🧥', hint: 'Warm clothing protects Alex from getting sick in freezing weather.' },
+            { id: 'n4', name: 'Doctor Visit Pass', category: 'need', price: 10, icon: '🩺', hint: 'Healthcare ensures Alex stays safe when feeling sick.' },
+            { id: 'n5', name: 'Simple Shoes', category: 'need', price: 15, icon: '👟', hint: 'Sturdy shoes protect Alex\'s feet when walking to school.' },
+            
+            // Wants
+            { id: 'w1', name: 'Video Game Pack', category: 'want', price: 25, icon: '🎮', hint: 'Video games are super fun, but Alex can live safely without them!' },
+            { id: 'w2', name: 'Designer Sneakers', category: 'want', price: 45, icon: '✨', hint: 'Fancy designer shoes look cool, but simple shoes protect feet just as well!' },
+            { id: 'w3', name: 'Fizzy Soda Basket', category: 'want', price: 8, icon: '🥤', hint: 'Soda is a tasty treat, but water is what Alex really needs for health.' },
+            { id: 'w4', name: 'Giant Toy Bear', category: 'want', price: 18, icon: '🧸', hint: 'Teddy bears give great hugs, but it\'s a fun want, not a health necessity.' },
+            { id: 'w5', name: 'Chocolate Sundae', category: 'want', price: 5, icon: '🍨', hint: 'Desserts are delicious extras, but essential meals come first!' }
+        ];
+
+        // Global State Management
+        let gameState = {
+            phase: 1,
+            sortedItems: {}, // itemId -> 'need' | 'want'
+            selectedCardId: null, // for tap-to-select mobile fallback
+            budget: 70,
+            cart: new Set(), // Set of item IDs purchased
+            needsPurchasedCount: 0,
+            toastTimeout: null
+        };
+
+        // Simple Web Audio API Synthesizer (No external sound files required)
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+            }
+            playTone(freq, duration, type = 'sine') {
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            }
+            success() {
+                this.playTone(523.25, 0.1); // C5
+                setTimeout(() => this.playTone(659.25, 0.15), 100); // E5
+            }
+            error() {
+                this.playTone(220, 0.15, 'sawtooth'); // A3
+            }
+            fanfare() {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((n, idx) => {
+                    setTimeout(() => this.playTone(n, 0.25), idx * 120);
+                });
+            }
+        }
+        const sfx = new SoundFX();
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initPhase1();
+            setupDragAndDrop();
+        });
+
+        function initPhase1() {
+            const deck = document.getElementById('deck-items');
+            deck.innerHTML = '';
+            document.getElementById('items-need').innerHTML = '';
+            document.getElementById('items-want').innerHTML = '';
+            gameState.sortedItems = {};
+            gameState.selectedCardId = null;
+
+            // Shuffle items
+            const shuffled = [...ITEMS_DATA].sort(() => Math.random() - 0.5);
+            shuffled.forEach(item => {
+                const card = createItemCard(item);
+                deck.appendChild(card);
+            });
+
+            updateSortingProgress();
+        }
+
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.id = `card-${item.id}`;
+            card.setAttribute('draggable', 'true');
+            card.setAttribute('data-id', item.id);
+
+            card.innerHTML = `
+                <div class="item-icon">${item.icon}</div>
+                <div class="item-details">
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-price">$${item.price}</span>
+                </div>
+            `;
+
+            // Drag Events
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+
+            // Tap/Click fallback selection
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleCardTap(item.id);
+            });
+
+            return card;
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.getAttribute('data-id'));
+            e.target.classList.add('dragging');
+            sfx.init();
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function setupDragAndDrop() {
+            const buckets = document.querySelectorAll('.bucket');
+            buckets.forEach(bucket => {
+                bucket.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    bucket.classList.add('drag-over');
+                });
+
+                bucket.addEventListener('dragleave', () => {
+                    bucket.classList.remove('drag-over');
+                });
+
+                bucket.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    bucket.classList.remove('drag-over');
+                    const itemId = e.dataTransfer.getData('text/plain');
+                    const targetCategory = bucket.getAttribute('data-type');
+                    processClassification(itemId, targetCategory);
+                });
+
+                // Tap bucket fallback
+                bucket.addEventListener('click', () => {
+                    if (gameState.selectedCardId) {
+                        const targetCategory = bucket.getAttribute('data-type');
+                        processClassification(gameState.selectedCardId, targetCategory);
+                    }
+                });
+            });
+
+            // Tap outside deselect
+            document.addEventListener('click', () => {
+                if (gameState.selectedCardId) {
+                    deselectAllCards();
+                }
+            });
+        }
+
+        function handleCardTap(itemId) {
+            sfx.init();
+            if (gameState.selectedCardId === itemId) {
+                deselectAllCards();
+            } else {
+                deselectAllCards();
+                gameState.selectedCardId = itemId;
+                const card = document.getElementById(`card-${itemId}`);
+                if (card) card.classList.add('selected');
+                showToast("👉 Now tap either the 'Needs Bucket' or 'Wants Bucket'!", "Select Target", "🎯");
+            }
+        }
+
+        function deselectAllCards() {
+            gameState.selectedCardId = null;
+            document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        function processClassification(itemId, targetCategory) {
+            const item = ITEMS_DATA.find(i => i.id === itemId);
+            if (!item) return;
+
+            deselectAllCards();
+
+            if (item.category === targetCategory) {
+                // Correct Placement!
+                sfx.success();
+                gameState.sortedItems[itemId] = targetCategory;
+
+                const card = document.getElementById(`card-${itemId}`);
+                card.classList.remove('selected');
+                card.removeAttribute('draggable');
+
+                const targetContainer = document.getElementById(`items-${targetCategory}`);
+                targetContainer.appendChild(card);
+
+                // Update Alex avatar feeling happy
+                document.getElementById('alex-emoji').innerText = '😄';
+                setTimeout(() => document.getElementById('alex-emoji').innerText = '😊', 1000);
+
+                updateSortingProgress();
+            } else {
+                // Incorrect Placement - Provide Instructional Hint Scaffold
+                sfx.error();
+                document.getElementById('alex-emoji').innerText = '🤔';
+                
+                const title = targetCategory === 'need' 
+                    ? `Is ${item.name} really a Need?` 
+                    : `Is ${item.name} just a Want?`;
+
+                showToast(item.hint, title, "💡");
+
+                // Card bounce animation
+                const card = document.getElementById(`card-${itemId}`);
+                if (card) {
+                    card.style.transform = 'shake 0.4s';
+                    setTimeout(() => card.style.transform = '', 400);
+                }
+            }
+        }
+
+        function updateSortingProgress() {
+            const sortedCount = Object.keys(gameState.sortedItems).length;
+            const total = ITEMS_DATA.length;
+
+            document.getElementById('sorting-progress').innerText = `${sortedCount}/${total} Sorted`;
+
+            if (sortedCount === total) {
+                sfx.fanfare();
+                document.getElementById('btn-to-phase2').disabled = false;
+                showToast("Awesome job! You correctly sorted all Needs and Wants. Tap 'Start Weekly Shopping Run'!", "Phase 1 Complete!", "🌟");
+            }
+        }
+
+        function transitionToPhase2() {
+            gameState.phase = 2;
+            document.getElementById('phase-1').classList.remove('active');
+
+            setTimeout(() => {
+                document.getElementById('phase-2').classList.add('active');
+                document.getElementById('phase-badge').innerHTML = '<span>🛒</span> Phase 2';
+                document.getElementById('sub-header-text').innerText = 'Phase 2: Weekly Shopping & Budgeting';
+                document.getElementById('alex-emoji').innerText = '🛍️';
+                initStoreShelves();
+                updateBudgetUI();
+            }, 300);
+        }
+
+        function initStoreShelves() {
+            const needsShelf = document.getElementById('shelf-needs');
+            const wantsShelf = document.getElementById('shelf-wants');
+            needsShelf.innerHTML = '';
+            wantsShelf.innerHTML = '';
+
+            ITEMS_DATA.forEach(item => {
+                const elem = document.createElement('div');
+                elem.className = `store-item ${item.category === 'want' ? 'want-item' : ''}`;
+                elem.id = `store-item-${item.id}`;
+
+                elem.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.8rem;">${item.icon}</span>
+                        <div>
+                            <div style="font-weight:800; font-size:0.95rem;">${item.name}</div>
+                            <div style="font-weight:700; color:var(--accent-gold); font-size:0.85rem;">$${item.price}</div>
+                        </div>
+                    </div>
+                    <button class="buy-btn" id="buy-btn-${item.id}" onclick="toggleBuyItem('${item.id}')">
+                        Buy $${item.price}
+                    </button>
+                `;
+
+                if (item.category === 'need') {
+                    needsShelf.appendChild(elem);
+                } else {
+                    wantsShelf.appendChild(elem);
+                }
+            });
+        }
+
+        function toggleBuyItem(itemId) {
+            sfx.init();
+            const item = ITEMS_DATA.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (gameState.cart.has(itemId)) {
+                // Unbuy item
+                gameState.cart.delete(itemId);
+                sfx.playTone(350, 0.1);
+            } else {
+                // Calculate total if bought
+                let currentSpent = 0;
+                gameState.cart.forEach(id => {
+                    const it = ITEMS_DATA.find(x => x.id === id);
+                    currentSpent += it.price;
+                });
+
+                if (currentSpent + item.price > gameState.budget) {
+                    sfx.error();
+                    showToast(`Oops! You don't have enough money left in your wallet to buy ${item.name}!`, "Budget Limit Reached", "⚠️");
+                    return;
+                }
+
+                // Warn if buying Want before all Needs are bought
+                const totalNeeds = ITEMS_DATA.filter(i => i.category === 'need').length;
+                let boughtNeeds = 0;
+                gameState.cart.forEach(id => {
+                    if (ITEMS_DATA.find(x => x.id === id).category === 'need') boughtNeeds++;
+                });
+
+                if (item.category === 'want' && boughtNeeds < totalNeeds) {
+                    sfx.error();
+                    showToast("Alex needs essential food, water, and shelter first! Buy all Needs to protect Alex's health before buying Want items.", "Needs Come First!", "🚨");
+                    return;
+                }
+
+                gameState.cart.add(itemId);
+                sfx.success();
+            }
+
+            updateBudgetUI();
+        }
+
+        function updateBudgetUI() {
+            let spent = 0;
+            let needsBought = 0;
+            const totalNeeds = ITEMS_DATA.filter(i => i.category === 'need').length;
+
+            ITEMS_DATA.forEach(item => {
+                const storeItem = document.getElementById(`store-item-${item.id}`);
+                const buyBtn = document.getElementById(`buy-btn-${item.id}`);
+
+                if (gameState.cart.has(item.id)) {
+                    spent += item.price;
+                    if (item.category === 'need') needsBought++;
+                    if (storeItem) storeItem.classList.add('bought');
+                    if (buyBtn) {
+                        buyBtn.classList.add('bought-btn');
+                        buyBtn.innerText = 'Bought';
+                    }
+                } else {
+                    if (storeItem) storeItem.classList.remove('bought');
+                    if (buyBtn) {
+                        buyBtn.classList.remove('bought-btn');
+                        buyBtn.innerText = `Buy $${item.price}`;
+                    }
+                }
+            });
+
+            const remaining = gameState.budget - spent;
+            document.getElementById('wallet-display').innerText = `$${remaining.toFixed(2)}`;
+
+            // Health Meter calculation
+            const healthPercent = Math.round((needsBought / totalNeeds) * 100);
+            document.getElementById('meter-text').innerText = `${healthPercent}%`;
+            document.getElementById('meter-bar').style.width = `${healthPercent}%`;
+
+            // Change Alex Expression based on health
+            const alex = document.getElementById('alex-emoji');
+            if (healthPercent === 100) {
+                alex.innerText = '🥳';
+            } else if (healthPercent >= 60) {
+                alex.innerText = '🙂';
+            } else {
+                alex.innerText = '😟';
+            }
+        }
+
+        function attemptCheckout() {
+            sfx.init();
+            const totalNeeds = ITEMS_DATA.filter(i => i.category === 'need').length;
+            let needsBought = 0;
+            let needsCost = 0;
+            let wantsCost = 0;
+
+            gameState.cart.forEach(id => {
+                const item = ITEMS_DATA.find(x => x.id === id);
+                if (item.category === 'need') {
+                    needsBought++;
+                    needsCost += item.price;
+                } else {
+                    wantsCost += item.price;
+                }
+            });
+
+            if (needsBought < totalNeeds) {
+                sfx.error();
+                showToast("Alex doesn't have all essential needs covered for the week! Make sure to buy clean water, meals, shoes, jacket, and doctor pass.", "Health Warning!", "❤️");
+                return;
+            }
+
+            // Mission Success!
+            sfx.fanfare();
+            const remainingSaved = gameState.budget - (needsCost + wantsCost);
+
+            document.getElementById('sum-needs').innerText = `${needsBought} / ${totalNeeds} ($${needsCost})`;
+            document.getElementById('sum-wants').innerText = `$${wantsCost}`;
+            document.getElementById('sum-saved').innerText = `$${remainingSaved.toFixed(2)}`;
+
+            const modal = document.getElementById('summary-modal');
+            modal.classList.add('active');
+            triggerConfetti();
+        }
+
+        function showToast(msg, title = "Friendly Hint", icon = "💡") {
+            const toast = document.getElementById('hint-toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').innerText = icon;
+
+            toast.classList.add('show');
+
+            if (gameState.toastTimeout) clearTimeout(gameState.toastTimeout);
+            gameState.toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        // Lightweight Canvas Confetti
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            const particles = [];
+            const colors = ['#f59e0b', '#10b981', '#8b5cf6', '#ef4444', '#3b82f6'];
+
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: -20,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: Math.random() * 2 - 1,
+                    rot: Math.random() * 360
+                });
+            }
+
+            let animId;
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.rot += 2;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rot * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (particles.some(p => p.y < canvas.height)) {
+                    animId = requestAnimationFrame(render);
+                }
+            }
+            render();
+        }
+
+        function resetGame() {
+            document.getElementById('summary-modal').classList.remove('active');
+            gameState.cart.clear();
+            gameState.phase = 1;
+            document.getElementById('phase-2').classList.remove('active');
+            document.getElementById('phase-1').classList.add('active');
+            document.getElementById('phase-badge').innerHTML = '<span>🧩</span> Phase 1';
+            document.getElementById('sub-header-text').innerText = 'Phase 1: Needs vs. Wants Sorting';
+            document.getElementById('btn-to-phase2').disabled = true;
+            initPhase1();
+        }
+    </script>
+</body>
+</html>
